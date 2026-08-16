@@ -1,54 +1,37 @@
-from sentence_transformers import SentenceTransformer
+from fastembed import TextEmbedding
 
 
 class EmbeddingService:
 
     def __init__(self):
+        print("Loading lightweight embedding model...")
 
-        print("Loading embedding model...")
-
-        self.model = SentenceTransformer(
-            "all-MiniLM-L6-v2"
+        self.model = TextEmbedding(
+            model_name="BAAI/bge-small-en-v1.5"
         )
 
         print("Embedding model loaded.")
 
-    def generate_embeddings(
-        self,
-        items
-    ):
+    def generate_embeddings(self, items):
 
         texts = []
 
         for item in items:
 
-            # Document chunk:
-            # {"text": "...", "page": 1}
+            # Document chunk
             if isinstance(item, dict):
+                texts.append(item["text"])
 
-                texts.append(
-                    item["text"]
-                )
-
-            # Search query:
-            # "What is this document about?"
+            # Search query
             elif isinstance(item, str):
-
-                texts.append(
-                    item
-                )
+                texts.append(item)
 
             else:
-
                 raise TypeError(
-                    "Each embedding item must "
-                    "be a dictionary or string"
+                    "Each embedding item must be a dictionary or string"
                 )
 
-        embeddings = self.model.encode(
-            texts,
-            convert_to_numpy=True
-        )
+        embeddings = self.model.embed(texts)
 
         return [
             embedding.tolist()
@@ -59,13 +42,6 @@ class EmbeddingService:
 embedding_service = EmbeddingService()
 
 
-def generate_embeddings(
-    items
-):
+def generate_embeddings(items):
 
-    return (
-        embedding_service
-        .generate_embeddings(
-            items
-        )
-    )
+    return embedding_service.generate_embeddings(items)
