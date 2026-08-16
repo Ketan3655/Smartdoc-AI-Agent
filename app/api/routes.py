@@ -33,19 +33,26 @@ router = APIRouter(prefix="/documents", tags=["Documents"])
 ALLOWED_TYPES = {".pdf", ".docx", ".txt"}
 
 current_user: User = Depends(get_current_user)
-@router.post("/upload")
-async def upload_document(file: UploadFile = File(...), db: Session = Depends(get_db)):
-    if not file.filename:
-        raise HTTPException(status_code=400, detail="Filename is missing")
 
-    extension = Path(file.filename).suffix.lower(),
-    current_user: User = Depends(get_current_user)
+@router.post("/upload")
+async def upload_document(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db)
+    
+):
+    if not file.filename:
+        raise HTTPException(
+            status_code=400,
+            detail="Filename is missing"
+        )
+
+    extension = Path(file.filename).suffix.lower()
 
     if extension not in ALLOWED_TYPES:
         raise HTTPException(
-            status_code=400, detail=("Only PDF, DOCX, and TXT " "files are supported")
+            status_code=400,
+            detail="Only PDF, DOCX, and TXT files are supported"
         )
-
     # Create uploads folder
     upload_dir = Path("uploads")
 
